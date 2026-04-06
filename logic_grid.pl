@@ -144,33 +144,76 @@ modelo([
     alldifferent([Jo1, Jo2, Jo3, Jo4, Jo5]),
     alldifferent([Ma1, Ma2, Ma3, Ma4, Ma5]),
     alldifferent([Su1, Su2, Su3, Su4, Su5]),
+    
+
+  % A Lista unifica as variáveis das tuplas com uma lista nomeada,
+  % permitindo usar predicados como member/2, ao_lado/3, etc.
+
+    Lista = [(Mo1, No1, Me1, Jo1, Ma1, Su1),
+    (Mo2, No2, Me2, Jo2, Ma2, Su2),
+    (Mo3, No3, Me3, Jo3, Ma3, Su3),
+    (Mo4, No4, Me4, Jo4, Ma4, Su4),
+    (Mo5, No5, Me5, Jo5, Ma5, Su5)],
+
+
+
+
+  % member((_, joao, _, _, historia, _), Lista) significa:
+  % "existe uma posição na Lista onde o nome é joao E a matéria é historia"
+  % Os underscores (_) ignoram os atributos que não importam pra regra.
+
+
 
     % Regra 1:  O menino que nasceu no mês de setembro está ao lado de quem gosta de suco de Laranja.
+
     % Regra 2:  João gosta de história.
+    member((_, joao, _, _, historia, _), Lista),
     % Regra 3:  O garoto da mochila Azul está em algum lugar à esquerda de quem nasceu em maio.
     % Regra 4:  Will está ao lado do menino que gosta de Problemas de Lógica.
     % Regra 5:  O garoto da mochila Branca está exatamente à esquerda de Will.
     % Regra 6:  Na terceira posição está quem gosta de suco de Morango.
     Su3 == morango,
+
     % Regra 7:  Quem gosta de suco de Uva gosta de Problemas de Lógica.
+    member((_, _, _, prob_logica, _, uva), Lista),
     % Regra 8:  O garoto que gosta do Jogo da Forca está ao lado do que gosta do 3 ou Mais.
     % Regra 9:  O menino que gosta de suco de Uva está em algum lugar à direita do garoto da mochila Azul.
+
     % Regra 10: O garoto que gosta de Biologia gosta de suco de Morango.
+    member((_, _, _, _, biologia, morango), Lista),
+
     % Regra 11: O menino que nasceu em janeiro está ao lado de quem nasceu em setembro.
     % Regra 12: Quem gosta de suco de Uva está exatamente à esquerda de quem gosta de Português.
+
     % Regra 13: O menino que gosta de Matemática nasceu em dezembro.
+    member((_, _, dezembro, _, matematica, _), Lista),
+
+
     % Regra 14: Quem curte Problemas de Lógica está ao lado do menino da mochila Amarela.
+
     % Regra 15: O dono da mochila Azul nasceu em janeiro.
+    member((azul, _, janeiro, _, _, _), Lista),
+
+
     % Regra 16: O garoto que nasceu em setembro está ao lado de quem gosta de jogar Cubo Vermelho.
     % Regra 17: Na primeira posição está quem gosta de suco de Limão.
     Su1 == limao, 
+
     % Regra 18: Quem gosta de Matemática gosta também de suco de Maracujá.
+    member((_, _, _, _, matematica, maracuja), Lista),
+
+
     % Regra 19: Lenin está na quinta posição.
     No5 == lenin,
+
     % Regra 20: Em uma das pontas está o menino que adora jogar Cubo Vermelho.
+    (Jo1 == cubo_vermelho ; Jo5 == cubo_vermelho),
+
     % Regra 21: Quem gosta do Jogo da Forca está ao lado do dono da mochila Vermelha.
+
     % Regra 22: Otávio está em uma das pontas.
     (No1 == otavio ; No5 == otavio),
+
     % Regra 23: Na terceira posição está o menino que gosta do Jogo da Forca.
     Jo3 == jogo_da_forca,
     true. % remover quando adicionar as regras
