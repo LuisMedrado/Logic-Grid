@@ -1,58 +1,3 @@
-% :- use_module(library(clpfd)).
-
-% main:-
-
-% % FATOS
-%     mochila = [moch_1, moch_2, moch_3, moch_4, moch_5],
-%     mochila ins 1..5,
-%     nome = [nome_1, nome_2, nome_3, nome_4, nome_5],
-%     nome ins 1..5,
-%     mes = [mes_1, mes_2, mes_3, mes_4, mes_5],
-%     mes ins 1..5,
-%     jogo = [jogo_1, jogo_2, jogo_3, jogo_4, jogo_5],
-%     jogo ins 1..5,
-%     materia =  [mat_1, mat_2, mat_3, mat_4, mat_5],
-%     materia ins 1..5,
-%     suco = [suco_1, suco_2, suco_3, suco_4, suco_5],
-%     suco ins 1..5.
-
-% % RESTRICAO DE DIFERENCAS
-
-% all_different(mochila).
-% all_different(nome).
-% all_different(mes).
-% all_different(jogo).
-% all_different(materia).
-% all_different(suco).
-
-% % PREDICADO PRA VERIFICAR
-% is_valid(Categoria, Valor) :-
-%     item(Categoria, Lista),
-%     member(Valor, Lista).
-
-% % DEFINICAO DE CERTEZAS
-
-% nome_5 #= lenin.
-% suco_1 #= limao.
-% suco_3 #= morango.
-% mat_3 #= biologia.
-% jogo_3 #= forca.
-% nome_1 #= otavio.
-
-% % DEFINICAO DE POSSIBILIDADES
-
-% (jogo_1 == cubo_vermelho;
-% jogo_5 == cubo_vermelho),
-
-% ((jogo_1 #= cubo_vermelho, mes_2 #= setembro)
-% ;(jogo_5 #= cubo_vermelho, mes_4 #= setembro)
-% ),
-
-% ((mes_2 #= setembro) #=> (suco_1 #= laranja #\/ suco_3 #= laranja)
-% ;true
-% ).
-
-
 % ==========================================
 % FATOS — Domínios dos atributos
 % ==========================================
@@ -99,12 +44,15 @@ suco(uva).
 % ==========================================
 
 % Garante que todos os elementos da lista são distintos
-alldifferent([]).
-alldifferent([H|T]) :-
-    \+ member(H, T),
-    alldifferent(T).
+%%%%% vi um jeito de fazer sem usar o alldifferent em um post de uma universidade, vou testar pq parece que roda mais rapido
+% alldifferent([]).
+% alldifferent([H|T]) :-
+%   \+ member(H, T),
+%   alldifferent(T).
 
 % X está ao lado de Y (qualquer ordem)
+%%%%%% essas constraints ajudaram muito gui, mandou bem dms
+
 ao_lado(X, Y, Lista) :- nextto(X, Y, Lista).
 ao_lado(X, Y, Lista) :- nextto(Y, X, Lista).
 
@@ -119,111 +67,136 @@ exatamente_a_esquerda(X, Y, Lista) :- nextto(X, Y, Lista).
 % ==========================================
 % MODELO
 % ==========================================
-% Cada posição é uma tupla: (Mochila, Nome, Mes, Jogo, Materia, Suco)
 
-modelo([
-    (Mo1, No1, Me1, Jo1, Ma1, Su1),   % posição 1
-    (Mo2, No2, Me2, Jo2, Ma2, Su2),   % posição 2
-    (Mo3, No3, Me3, Jo3, Ma3, Su3),   % posição 3
-    (Mo4, No4, Me4, Jo4, Ma4, Su4),   % posição 4
-    (Mo5, No5, Me5, Jo5, Ma5, Su5)    % posição 5
-]) :-
+modelo(Lista) :-
+    %% estrutura vazia, so com as variáveis
+    Lista = [
+        (_Mo1, _No1, _Me1, _Jo1, _Ma1, Su1),  % posição 1
+        (_Mo2, _No2, _Me2, _Jo2, _Ma2, _Su2), % posição 2
+        (_Mo3, _No3, _Me3, Jo3, _Ma3, Su3),   % posição 3
+        (_Mo4, _No4, _Me4, _Jo4, _Ma4, _Su4), % posição 4
+        (_Mo5, No5, _Me5, Jo5, _Ma5, _Su5)    % posição 5
+    ],
 
-    % Cada variável recebe um valor do domínio
-    mochila(Mo1), mochila(Mo2), mochila(Mo3), mochila(Mo4), mochila(Mo5),
-    nome(No1),    nome(No2),    nome(No3),    nome(No4),    nome(No5),
-    mes(Me1),     mes(Me2),     mes(Me3),     mes(Me4),     mes(Me5),
-    jogo(Jo1),    jogo(Jo2),    jogo(Jo3),    jogo(Jo4),    jogo(Jo5),
-    materia(Ma1), materia(Ma2), materia(Ma3), materia(Ma4), materia(Ma5),
-    suco(Su1),    suco(Su2),    suco(Su3),    suco(Su4),    suco(Su5),
+  %% mudei a ordem das regras por conta do backtracking, tava demorando muito pra compreender todas as possibilidades na ordem consecutiva
 
-    % Todos os valores de cada categoria são distintos
-    alldifferent([Mo1, Mo2, Mo3, Mo4, Mo5]),
-    alldifferent([No1, No2, No3, No4, No5]),
-    alldifferent([Me1, Me2, Me3, Me4, Me5]),
-    alldifferent([Jo1, Jo2, Jo3, Jo4, Jo5]),
-    alldifferent([Ma1, Ma2, Ma3, Ma4, Ma5]),
-    alldifferent([Su1, Su2, Su3, Su4, Su5]),
-    
+    % Regra 6:  Na terceira posição está quem gosta de suco de Morango.
+    Su3 = morango,
 
-  % A Lista unifica as variáveis das tuplas com uma lista nomeada,
-  % permitindo usar predicados como member/2, ao_lado/3, etc.
+    % Regra 17: Na primeira posição está quem gosta de suco de Limão.
+    Su1 = limao,
 
-    Lista = [(Mo1, No1, Me1, Jo1, Ma1, Su1),
-    (Mo2, No2, Me2, Jo2, Ma2, Su2),
-    (Mo3, No3, Me3, Jo3, Ma3, Su3),
-    (Mo4, No4, Me4, Jo4, Ma4, Su4),
-    (Mo5, No5, Me5, Jo5, Ma5, Su5)],
+    % Regra 19: Lenin está na quinta posição.
+    No5 = lenin,
 
+    % Regra 23: Na terceira posição está o menino que gosta do Jogo da Forca.
+    Jo3 = jogo_da_forca,
 
+    % Regra 20: Em uma das pontas está o menino que adora jogar Cubo Vermelho.
+    (Lista = [(_, _, _, cubo_vermelho, _, _) | _] ; Lista = [_, _, _, _, (_, _, _, cubo_vermelho, _, _)]),
 
-
-  % member((_, joao, _, _, historia, _), Lista) significa:
-  % "existe uma posição na Lista onde o nome é joao E a matéria é historia"
-  % Os underscores (_) ignoram os atributos que não importam pra regra.
-
-
-
-    % Regra 1:  O menino que nasceu no mês de setembro está ao lado de quem gosta de suco de Laranja.
+    % Regra 22: Otávio está em uma das pontas.
+    (Lista = [(_, otavio, _, _, _, _) | _] ; Lista = [_, _, _, _, (_, otavio, _, _, _, _)]),
 
     % Regra 2:  João gosta de história.
     member((_, joao, _, _, historia, _), Lista),
-    % Regra 3:  O garoto da mochila Azul está em algum lugar à esquerda de quem nasceu em maio.
-    % Regra 4:  Will está ao lado do menino que gosta de Problemas de Lógica.
-    % Regra 5:  O garoto da mochila Branca está exatamente à esquerda de Will.
-    % Regra 6:  Na terceira posição está quem gosta de suco de Morango.
-    Su3 == morango,
 
     % Regra 7:  Quem gosta de suco de Uva gosta de Problemas de Lógica.
     member((_, _, _, prob_logica, _, uva), Lista),
-    % Regra 8:  O garoto que gosta do Jogo da Forca está ao lado do que gosta do 3 ou Mais.
-    % Regra 9:  O menino que gosta de suco de Uva está em algum lugar à direita do garoto da mochila Azul.
 
     % Regra 10: O garoto que gosta de Biologia gosta de suco de Morango.
     member((_, _, _, _, biologia, morango), Lista),
 
-    % Regra 11: O menino que nasceu em janeiro está ao lado de quem nasceu em setembro.
-    % Regra 12: Quem gosta de suco de Uva está exatamente à esquerda de quem gosta de Português.
-
     % Regra 13: O menino que gosta de Matemática nasceu em dezembro.
     member((_, _, dezembro, _, matematica, _), Lista),
-
-
-    % Regra 14: Quem curte Problemas de Lógica está ao lado do menino da mochila Amarela.
 
     % Regra 15: O dono da mochila Azul nasceu em janeiro.
     member((azul, _, janeiro, _, _, _), Lista),
 
-
-    % Regra 16: O garoto que nasceu em setembro está ao lado de quem gosta de jogar Cubo Vermelho.
-    % Regra 17: Na primeira posição está quem gosta de suco de Limão.
-    Su1 == limao, 
-
     % Regra 18: Quem gosta de Matemática gosta também de suco de Maracujá.
     member((_, _, _, _, matematica, maracuja), Lista),
 
+    % Regra 1:  O menino que nasceu no mês de setembro está ao lado de quem gosta de suco de Laranja.
+    ao_lado((_, _, setembro, _, _, _), (_, _, _, _, _, laranja), Lista),
 
-    % Regra 19: Lenin está na quinta posição.
-    No5 == lenin,
+    % Regra 3:  O garoto da mochila Azul está em algum lugar à esquerda de quem nasceu em maio.
+    a_esquerda_de((azul, _, _, _, _, _), (_, _, maio, _, _, _), Lista),
 
-    % Regra 20: Em uma das pontas está o menino que adora jogar Cubo Vermelho.
-    (Jo1 == cubo_vermelho ; Jo5 == cubo_vermelho),
+    % Regra 4:  Will está ao lado do menino que gosta de Problemas de Lógica.
+    ao_lado((_, will, _, _, _, _), (_, _, _, prob_logica, _, _), Lista),
+
+    % Regra 5:  O garoto da mochila Branca está exatamente à esquerda de Will.
+    exatamente_a_esquerda((branca, _, _, _, _, _), (_, will, _, _, _, _), Lista),
+
+    % Regra 8:  O garoto que gosta do Jogo da Forca está ao lado do que gosta do 3 ou Mais.
+    ao_lado((_, _, _, jogo_da_forca, _, _), (_, _, _, tres_ou_mais, _, _), Lista),
+
+    % Regra 9:  O menino que gosta de suco de Uva está em algum lugar à direita do garoto da mochila Azul.
+    a_esquerda_de((azul, _, _, _, _, _), (_, _, _, _, _, uva), Lista),
+
+    % Regra 11: O menino que nasceu em janeiro está ao lado de quem nasceu em setembro.
+    ao_lado((_, _, janeiro, _, _, _), (_, _, setembro, _, _, _), Lista),
+
+    % Regra 12: Quem gosta de suco de Uva está exatamente à esquerda de quem gosta de Português.
+    exatamente_a_esquerda((_, _, _, _, _, uva), (_, _, _, _, portugues, _), Lista),
+
+    % Regra 14: Quem curte Problemas de Lógica está ao lado do menino da mochila Amarela.
+    ao_lado((_, _, _, prob_logica, _, _), (amarela, _, _, _, _, _), Lista),
+
+    % Regra 16: O garoto que nasceu em setembro está ao lado de quem gosta de jogar Cubo Vermelho.
+    ao_lado((_, _, setembro, _, _, _), (_, _, _, cubo_vermelho, _, _), Lista),
 
     % Regra 21: Quem gosta do Jogo da Forca está ao lado do dono da mochila Vermelha.
+    ao_lado((_, _, _, jogo_da_forca, _, _), (vermelha, _, _, _, _, _), Lista),
 
-    % Regra 22: Otávio está em uma das pontas.
-    (No1 == otavio ; No5 == otavio),
+    % cor de mochila
+    member((amarela, _, _, _, _, _), Lista),
+    member((azul, _, _, _, _, _), Lista),
+    member((branca, _, _, _, _, _), Lista),
+    member((verde, _, _, _, _, _), Lista),
+    member((vermelha, _, _, _, _, _), Lista),
 
-    % Regra 23: Na terceira posição está o menino que gosta do Jogo da Forca.
-    Jo3 == jogo_da_forca,
-    true. % remover quando adicionar as regras
+    % nomes
+    member((_, denis, _, _, _, _), Lista),
+    member((_, joao, _, _, _, _), Lista),
+    member((_, lenin, _, _, _, _), Lista),
+    member((_, otavio, _, _, _, _), Lista),
+    member((_, will, _, _, _, _), Lista),
 
+    % meses
+    member((_, _, agosto, _, _, _), Lista),
+    member((_, _, dezembro, _, _, _), Lista),
+    member((_, _, janeiro, _, _, _), Lista),
+    member((_, _, maio, _, _, _), Lista),
+    member((_, _, setembro, _, _, _), Lista),
+
+    % jogos
+    member((_, _, _, tres_ou_mais, _, _), Lista),
+    member((_, _, _, caca_palavras, _, _), Lista),
+    member((_, _, _, cubo_vermelho, _, _), Lista),
+    member((_, _, _, jogo_da_forca, _, _), Lista),
+    member((_, _, _, prob_logica, _, _), Lista),
+
+    % materias
+    member((_, _, _, _, biologia, _), Lista),
+    member((_, _, _, _, geografia, _), Lista),
+    member((_, _, _, _, historia, _), Lista),
+    member((_, _, _, _, matematica, _), Lista),
+    member((_, _, _, _, portugues, _), Lista),
+
+    % sabores de suco
+    member((_, _, _, _, _, laranja), Lista),
+    member((_, _, _, _, _, limao), Lista),
+    member((_, _, _, _, _, maracuja), Lista),
+    member((_, _, _, _, _, morango), Lista),
+    member((_, _, _, _, _, uva), Lista).
 
 % ==========================================
 % MAIN
 % ==========================================
+
 main :-
-    statistics(cputime, T1),
+    statistics(cputime, _T1),
     modelo(Lista),
     imprime_lista(Lista),
     fail.
