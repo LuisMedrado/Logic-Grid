@@ -195,12 +195,14 @@ modelo(Lista) :-
 % MAIN
 % ==========================================
 
-main :-
+%%%%% tive que alterar o nome da regra main pra run, tava entrando em conflito com a regra main da biblioteca interna do prolog
+
+run :-
     statistics(cputime, _T1),
     modelo(Lista),
     imprime_lista(Lista),
     fail.
-main :-
+run :-
     statistics(cputime, T2),
     write('Busca finalizada. Tempo: '), write(T2), nl.
 
